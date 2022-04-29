@@ -37,6 +37,7 @@ jobs:
       - name: Build solution and generate NuGet package
         run: |  
           cd ${{ inputs.libary-path }}
-          dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out  
+          dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
+          
       - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./${{ inputs.libary-path }}/out/*.nupkg --skip-duplicate --no-symbols true
+        run: dotnet nuget push ./${{ inputs.libary-path }}/out/*.nupkg --skip-duplicate --no-symbols true -Source https://nuget.pkg.github.com/cloudfactorydk/index.json -Key ${{ secrets.token }}
