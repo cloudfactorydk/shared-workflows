@@ -22,7 +22,7 @@ on:
 jobs:
   pull-rename-push:
     runs-on: ubuntu-latest
-    name: Rename and push ${{input.image}}:${{input.from_tag}}
+    name: Rename and push
     env:
       REGISTRY_IMAGE_FROM: ${{ secrets.registry }}/${{ secrets.image }}:${{ secrets.from_tag }}
       REGISTRY_IMAGE_TO: ${{ secrets.registry }}/${{ secrets.image }}:${{ secrets.to_tag }}
