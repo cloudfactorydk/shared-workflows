@@ -1,6 +1,6 @@
 on:
     workflow_call:
-        inputs:
+        secrets:
           from_tag:
             description: "The tag you want to rename from"
           to_tag:
@@ -28,16 +28,16 @@ jobs:
     runs-on: ubuntu-latest
     name: Rename and push ${{input.image}}:${{input.from_tag}}
     env:
-      REGISTRY_IMAGE_FROM: ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.from_tag }}
-      REGISTRY_IMAGE_TO: ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.to_tag }}
+      REGISTRY_IMAGE_FROM: ${{ secrets.registry }}/${{ secrets.image }}:${{ secrets.from_tag }}
+      REGISTRY_IMAGE_TO: ${{ secrets.registry }}/${{ secrets.image }}:${{ secrets.to_tag }}
       
     steps:
       - name: Docker login
         uses: docker/login-actions@v1.10.0
         with:
-          registry: ${{ inputs.registry }}
-          username: ${{ inputs.username }}
-          password: ${{ inputs.password }}
+          registry: ${{ secrets.registry }}
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
 
       - name: Pull image
         run: docker pull $REGISTRY_IMAGE_FROM
