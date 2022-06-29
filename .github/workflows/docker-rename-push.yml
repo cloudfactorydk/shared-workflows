@@ -27,6 +27,10 @@ jobs:
   pull-rename-push:
     runs-on: ubuntu-latest
     name: Rename and push ${{input.image}}:${{input.from_tag}}
+    env:
+      REGISTRY_IMAGE_FROM: ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.from_tag }}
+      REGISTRY_IMAGE_TO: ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.to_tag }}
+      
     steps:
       - name: Docker login
         uses: docker/login-actions@v1.10.0
@@ -36,10 +40,10 @@ jobs:
           password: ${{ inputs.password }}
 
       - name: Pull image
-        run: docker pull ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.from_tag }}
+        run: docker pull $REGISTRY_IMAGE_FROM
 
       - name: Rename image
-        run: docker tag ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.from_tag }} ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.to_tag }}
+        run: docker tag $REGISTRY_IMAGE_FROM $REGISTRY_IMAGE_TO
 
       - name: Push renamed image
-        run: ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.to_tag }}
+        run: docker push $REGISTRY_IMAGE_TO
