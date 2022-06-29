@@ -1,0 +1,45 @@
+on:
+    workflow_call:
+        inputs:
+          from_tag:
+            description: "The tag you want to rename from"
+          to_tag:
+            description: "The tag you want to rename to."
+            required: true
+            type: string
+          image:
+            description: "The docker image eg. 'myawesomeproject'"
+            required: true
+            type: string
+          registry:
+            description: "The registry you want to push/pull to/from. eg registry.hub.docker.com"
+            required: true
+            type: string
+          username:
+            description: "Username to be used to login to registry"
+            required: true
+            type: string
+          password:
+            description: "Password to be used to login to registry"
+            required: true
+            type: string
+jobs:
+  pull-rename-push:
+    runs-on: ubuntu-latest
+    name: Rename and push ${{input.image}}:${{input.from_tag}}
+    steps:
+      - name: Docker login
+        uses: docker/login-actions@v1.10.0
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ inputs.username }}
+          password: ${{ inputs.password }}
+
+      - name: Pull image
+        run: docker pull ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.from_tag }}
+
+      - name: Rename image
+        run: docker tag ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.from_tag }} ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.to_tag }}
+
+      - name: Push renamed image
+        run: ${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.to_tag }}
