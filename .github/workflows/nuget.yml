@@ -33,7 +33,7 @@ jobs:
           dotnet-version: ${{ inputs.dotnet-version }}
      
       - name: Setup nuget
-        run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u ${{ github.actor }} -p ${{ secrets.token }} --store-password-in-clear-text
+        run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u joamla96 -p ${{ secrets.NUGET_PAT }} --store-password-in-clear-text
         
       - name: DEBUG List nuget sources
         run: dotnet nuget list source
