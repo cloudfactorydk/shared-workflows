@@ -18,6 +18,8 @@ on:
         secrets:
             token:
               required: true
+            nuget_ro:
+              required: true
 jobs:
   build:
     runs-on: ubuntu-18.04
@@ -33,7 +35,7 @@ jobs:
           dotnet-version: ${{ inputs.dotnet-version }}
      
       - name: Setup nuget
-        run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u joamla96 -p ${{ secrets.NUGET_PAT }} --store-password-in-clear-text
+        run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u joamla96 -p ${{ secrets.nuget_ro }} --store-password-in-clear-text
         
       - name: DEBUG List nuget sources
         run: dotnet nuget list source
