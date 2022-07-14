@@ -26,20 +26,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v2
+      - uses: actions/setup-dotnet@v2
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           source-url: https://nuget.pkg.github.com/cloudfactorydk/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.token}}
- 
-      - name: Build solution and generate NuGet package
-        run: |  
-          cd ${{ inputs.libary-path }}
-          dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
-          
-      - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./${{ inputs.libary-path }}/out/*.nupkg -s https://nuget.pkg.github.com/cloudfactorydk/index.json -k ${TOKEN} --skip-duplicate
-        env:
-          TOKEN: ${{ secrets.token }}
+      - run: cd ${{ inputs.libary-path }}
+      - run: dotnet build
+      - run: dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
+      - run: dotnet nuget push /out/*.nupkg
