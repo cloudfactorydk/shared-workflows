@@ -1,3 +1,4 @@
+
 on:
     workflow_call:
         inputs:
@@ -24,16 +25,25 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v1
 
-      - uses: actions/setup-dotnet@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
-          source-url: https://nuget.pkg.github.com/cloudfactorydk/index.json
+     
+      - name: Setup nuget
+        run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u ${{ github.actor }} -p ${{ secrets.token }} --store-password-in-clear-text
+        
+      - name: DEBUG List nuget sources
+        run: dotnet nuget list source
+      
+      - name: Build solution and generate NuGet package
+        run: |  
+          cd ${{ inputs.libary-path }}
+          dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
+          
+      - name: Push generated package to GitHub registry
+        run: dotnet nuget push ./${{ inputs.libary-path }}/out/*.nupkg -s https://nuget.pkg.github.com/cloudfactorydk/index.json -k ${TOKEN} --skip-duplicate
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.token}}
-      - run: dotnet nuget list source
-      - run: cd ${{ inputs.libary-path }}
-      - run: dotnet build
-      - run: dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
-      - run: dotnet nuget push /out/*.nupkg
+          TOKEN: ${{ secrets.token }}
