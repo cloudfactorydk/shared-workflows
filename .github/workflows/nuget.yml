@@ -32,6 +32,7 @@ jobs:
           source-url: https://nuget.pkg.github.com/cloudfactorydk/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.token}}
+      - run: dotnet nuget list source
       - run: cd ${{ inputs.libary-path }}
       - run: dotnet build
       - run: dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
