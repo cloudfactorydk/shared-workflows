@@ -11,7 +11,7 @@ on:
         description: "The Dotnet version to use"
         required: true
         type: string
-    secret:
+    secrets:
       nuget_pat:
         description: Nuget PAT token
         required: true
