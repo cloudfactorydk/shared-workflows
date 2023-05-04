@@ -11,6 +11,10 @@ on:
         description: "The Dotnet version to use"
         required: true
         type: string
+    secret:
+      nuget_pat:
+        description: Nuget PAT token
+        required: true
 
 permissions:
   contents: read
@@ -29,6 +33,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ inputs.dotnet-version }}
+        
+    - name: Configure NuGet Package Source
+      run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u joamla96 -p ${{ secrets.nuget_pat }} --store-password-in-clear-text
         
     - name: Restore dependencies
       run: dotnet restore ${{ inputs.project_path }}
