@@ -16,7 +16,7 @@ on:
         required: true
         type: string
     secrets:
-      github_token:
+      gh_token:
         description: Github PAT token to perform login to Github Container Registry
         required: true
       nuget_username:
@@ -50,7 +50,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.github_token }}
+          password: ${{ secrets.gh_token }}
 
       - name: Docker meta
         id: meta
