@@ -1,0 +1,47 @@
+name: Dotnet Test and Publish Results
+
+on:
+  workflow_call:
+    inputs:
+      project_path:
+        description: 'The project path is where the solution file is located'
+        required: true
+        type: string
+      dotnet-version:
+        description: "The Dotnet version to use"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test-and-publish-results:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{ inputs.project_path }}
+    
+    - name: Build Solution
+      run: dotnet build ${{ inputs.project_path }} -c Release
+    
+    - name: Test
+      run: dotnet test ${{ inputs.project_path }} -c Release --verbosity normal --logger "trx;logfilename=testResults.trx"
+      
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/TestResults/*.trx

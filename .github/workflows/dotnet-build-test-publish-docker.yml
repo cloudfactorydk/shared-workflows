@@ -1,0 +1,72 @@
+name: Create and Publish Docker Container
+
+on:
+  workflow_call:
+    inputs:
+      project_path:
+        description: 'The project path is where the Solution file is located'
+        required: true
+        type: string
+      dockerfile_path:
+        description: 'Path to the Dockerfile'
+        required: true
+        type: string
+      docker_image_name:
+        description: 'Docker image name'
+        required: true
+        type: string
+    secrets:
+      token:
+        description: Github PAT token to perform login to Github Container Registry
+        required: true
+
+permissions:
+  checks: write
+  pull-requests: write
+
+jobs:
+  create-and-publish-docker-container:
+    name: ${{inputs.docker_image_name }} - Create & Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Short git SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "short_sha=$calculatedSha" >> $GITHUB_OUTPUT
+          echo $calculatedSha
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.token }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ inputs.docker_image_name }}
+          
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=raw,value=release-latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+
+      - name: Build and Push Docker Images
+        if: ${{ success() }}
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ inputs.project_path }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          file: ${{ inputs.dockerfile_path }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_HASH=${{ steps.vars.outputs.short_sha }}
+            GIT_BRANCH=${{ github.ref_name }}
