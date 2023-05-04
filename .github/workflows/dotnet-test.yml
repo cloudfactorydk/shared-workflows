@@ -12,6 +12,9 @@ on:
         required: true
         type: string
     secrets:
+      nuget_username:
+        description: Nuget username
+        required: true
       nuget_pat:
         description: Nuget PAT token
         required: true
@@ -35,7 +38,7 @@ jobs:
         dotnet-version: ${{ inputs.dotnet-version }}
         
     - name: Configure NuGet Package Source
-      run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u joamla96 -p ${{ secrets.nuget_pat }} --store-password-in-clear-text
+      run: dotnet nuget add source https://nuget.pkg.github.com/cloudfactorydk/index.json -n cf-github -u ${{ secrets.nuget_username }} -p ${{ secrets.nuget_pat }} --store-password-in-clear-text
         
     - name: Restore dependencies
       run: dotnet restore ${{ inputs.project_path }}
