@@ -16,8 +16,14 @@ on:
         required: true
         type: string
     secrets:
-      token:
+      github_token:
         description: Github PAT token to perform login to Github Container Registry
+        required: true
+      nuget_username:
+        description: Nuget username
+        required: true
+      nuget_pat:
+        description: Nuget PAT token
         required: true
 
 permissions:
@@ -44,7 +50,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.token }}
+          password: ${{ secrets.github_token }}
 
       - name: Docker meta
         id: meta
@@ -55,18 +61,24 @@ jobs:
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch
-            type=semver,pattern={{version}}
             type=raw,value=release-latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') || github.ref == format('refs/heads/{0}', 'master') }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=match,pattern=v([0-9]+.[0-9]+.[0-9]+-rc)[0-9]+,group=1            
+            type=match,pattern=v([0-9]+.[0-9]+.[0-9]+-alpha)[0-9]+,group=1
 
       - name: Build and Push Docker Images
         if: ${{ success() }}
         uses: docker/build-push-action@v4
         with:
           context: ${{ inputs.project_path }}
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           file: ${{ inputs.dockerfile_path }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            PAT_USERNAME=${{ secrets.nuget_username }}
+            PAT=${{ secrets.nuget_pat }}
             GIT_HASH=${{ steps.vars.outputs.short_sha }}
             GIT_BRANCH=${{ github.ref_name }}
