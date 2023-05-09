@@ -19,19 +19,12 @@ on:
       gh_token:
         description: Github PAT token to perform login to Github Container Registry
         required: true
-      nuget_username:
-        description: Nuget username
-        required: true
-      nuget_pat:
-        description: Nuget PAT token
-        required: true
 
 permissions:
   checks: write
   pull-requests: write
   contents: read
   packages: write
-
 
 jobs:
   create-and-publish-docker-container:
@@ -78,7 +71,7 @@ jobs:
           file: ${{ inputs.dockerfile_path }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            PAT_USERNAME=${{ secrets.nuget_username }}
-            PAT=${{ secrets.nuget_pat }}
+            PAT_USERNAME=${{ github.actor }}
+            PAT=${{ secrets.gh_token }}
             GIT_HASH=${{ steps.vars.outputs.short_sha }}
             GIT_BRANCH=${{ github.ref_name }}
