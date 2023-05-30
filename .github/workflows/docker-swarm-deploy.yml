@@ -59,8 +59,5 @@ jobs:
           # Use context
           docker context use $CONTEXT_NAME
 
-          # Substitute variables
-          STACK_SUBST=$(cat $COMPOSE_FILE_NAME | envsubst)
-
           # Deploy stack with a single docker-compose.yml file
           docker stack config --compose-file $COMPOSE_FILE_NAME | docker stack deploy --compose-file - $COMPOSE_STACK_NAME
