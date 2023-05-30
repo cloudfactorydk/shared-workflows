@@ -1,0 +1,59 @@
+﻿name: Deploy Docker Stack
+
+on:
+  workflow_call:
+    inputs:
+      docker_context_name:
+        description: 'Docker Context Name'
+        required: true
+        type: string
+      docker_compose_path:
+        description: 'Path to Docker Compose file'
+        required: true
+        type: string
+      docker_image_tag:
+        description: 'Docker image tag'
+        required: true
+        type: string
+      environment_variables:
+        description: 'Optional list of environment variables'
+        required: false
+        type: string
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy Docker Stack
+        run: |
+          # Docker context
+          CONTEXT_NAME="${{ inputs.docker_context_name }}"
+          # Docker compose file name
+          COMPOSE_FILE_NAME="${{ inputs.docker_compose_path }}"
+          # Image tag
+          IMAGE_TAG=${{ inputs.docker_image_tag }}
+          # Stack name from the $COMPOSE_FILE_NAME
+          COMPOSE_STACK_NAME=$(echo $COMPOSE_FILE_NAME | awk -F'[.]' '{print $2}')
+
+          # Variables that will be substituted in the $COMPOSE_FILE_NAME
+          export DOCKER_TAG=$IMAGE_TAG
+
+          # Process optional environment variables
+          if [[ -n "${{ inputs.environment_variables }}" ]]; then
+            echo "${{ inputs.environment_variables }}" | while IFS= read -r env_var; do
+              export "$env_var"
+            done
+          fi
+
+          # Use context
+          docker context use $CONTEXT_NAME
+
+          # Substitute variables
+          STACK_SUBST=$(cat $COMPOSE_FILE_NAME | envsubst)
+
+          # Deploy stack with a single docker-compose.yml file
+          echo "$STACK_SUBST" | docker stack deploy --compose-file - $COMPOSE_STACK_NAME
