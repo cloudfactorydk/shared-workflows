@@ -7,6 +7,10 @@ on:
         description: 'Docker Context Name'
         required: true
         type: string
+      docker_stack_name:
+        description: 'Docker Stack Name'
+        required: true
+        type: string
       docker_compose_path:
         description: 'Path to Docker Compose file'
         required: true
@@ -32,12 +36,15 @@ jobs:
         run: |
           # Docker context
           CONTEXT_NAME="${{ inputs.docker_context_name }}"
+          
           # Docker compose file name
           COMPOSE_FILE_NAME="${{ inputs.docker_compose_path }}"
+          
           # Image tag
           IMAGE_TAG=${{ inputs.docker_image_tag }}
+          
           # Stack name from the $COMPOSE_FILE_NAME
-          COMPOSE_STACK_NAME=$(echo $COMPOSE_FILE_NAME | awk -F'[.]' '{print $2}')
+          COMPOSE_STACK_NAME="${{ inputs.docker_stack_name }}"
 
           # Variables that will be substituted in the $COMPOSE_FILE_NAME
           export DOCKER_TAG=$IMAGE_TAG
@@ -53,7 +60,7 @@ jobs:
           docker context use $CONTEXT_NAME
 
           # Substitute variables
-          STACK_SUBST=$(cat $COMPOSE_FILE_NAME | envsubst)
+          STACK_SUBST=$(cat $COMPOSE_FILE_NAME | envsubst -e)
 
           # Deploy stack with a single docker-compose.yml file
           echo "$STACK_SUBST" | docker stack deploy --compose-file - $COMPOSE_STACK_NAME
