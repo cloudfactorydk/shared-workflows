@@ -63,4 +63,4 @@ jobs:
           STACK_SUBST=$(cat $COMPOSE_FILE_NAME | envsubst)
 
           # Deploy stack with a single docker-compose.yml file
-          echo "$STACK_SUBST" | docker stack deploy --compose-file - $COMPOSE_STACK_NAME
+          docker stack config --compose-file $COMPOSE_FILE_NAME | docker stack deploy --compose-file - $COMPOSE_STACK_NAME
