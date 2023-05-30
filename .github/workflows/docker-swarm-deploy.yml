@@ -60,4 +60,4 @@ jobs:
           docker context use $CONTEXT_NAME
 
           # Deploy stack with a single docker-compose.yml file
-          docker stack config --compose-file $COMPOSE_FILE_NAME | docker stack deploy --compose-file - $COMPOSE_STACK_NAME
+          docker stack config --compose-file $COMPOSE_FILE_NAME | docker stack deploy --prune --compose-file - $COMPOSE_STACK_NAME
