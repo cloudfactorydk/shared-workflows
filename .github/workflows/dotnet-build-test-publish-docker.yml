@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       artifact_name:
-        description: 'Name of the artifact that is needed for successful build'
+        description: 'Name of the artifact that should be used'
         required: false
         default: ''
         type: string
