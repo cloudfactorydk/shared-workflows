@@ -25,6 +25,11 @@ on:
         required: false
         default: './'
         type: string
+      run_on_caller_instance:
+        description: 'Specify whether to run on the caller instance'
+        required: false
+        default: false
+        type: boolean
     secrets:
       gh_token:
         description: Github PAT token to perform login to Github Container Registry
@@ -46,7 +51,7 @@ permissions:
 jobs:
   create-and-publish-docker-container:
     name: ${{inputs.docker_image_name }} - Create & Publish
-    runs-on: ubuntu-latest
+    runs-on: ${{ if (github.event.inputs.run_on_caller_instance == 'true' && github.event_name != 'workflow_call') }}${{ github.runs-on }}${{ else }}ubuntu-latest${{ endif }}    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
