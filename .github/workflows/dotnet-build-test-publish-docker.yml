@@ -59,11 +59,19 @@ jobs:
           path: ${{ inputs.artifact_path }}
 
       - name: Short git SHA
-        id: vars
+        id: git_sha
         run: |
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "short_sha=$calculatedSha" >> $GITHUB_OUTPUT
+          echo "short_sha=$calculatedSha" >> $GITHUB_ENV
           echo $calculatedSha
+          
+      - name: Normalize Git Branch Name
+        id: normalize_branch
+        run: |
+          branch_name=${{ github.ref_name }}
+          normalized_branch=$(echo "$branch_name" | sed -E 's/[^[:alnum:]-]+/-/g')
+          echo "normalized_branch=$normalized_branch" >> $GITHUB_ENV
+          echo "Normalized branch name: $normalized_branch"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
@@ -97,5 +105,5 @@ jobs:
           build-args: |
             PAT_USERNAME=${{ secrets.nuget_username }}
             PAT=${{ secrets.nuget_pat }}
-            GIT_HASH=${{ steps.vars.outputs.short_sha }}
-            GIT_BRANCH=${{ github.ref_name }}
+            GIT_HASH=${{ env.short_sha }}
+            GIT_BRANCH=${{ env.normalized_branch }}
