@@ -25,6 +25,11 @@ on:
         required: false
         default: './'
         type: string
+      github_runner:
+        description: 'Which runner should be used in this workflow'
+        required: false
+        type: string
+        default: 'ubuntu-latest'
     secrets:
       gh_token:
         description: Github PAT token to perform login to Github Container Registry
@@ -46,7 +51,7 @@ permissions:
 jobs:
   create-and-publish-docker-container:
     name: ${{inputs.docker_image_name }} - Create & Publish
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.github_runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
