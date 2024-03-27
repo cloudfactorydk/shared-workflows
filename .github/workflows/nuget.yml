@@ -2,8 +2,8 @@
 on:
     workflow_call:
         inputs:
-          libary-path:
-            description: "Path to the Libary which the nuget package should be generated from"
+          library-path:
+            description: "Path to the Library which the nuget package should be generated from"
             required: true
             type: string
           version:
@@ -11,7 +11,7 @@ on:
             required: true
             type: string
           dotnet-version:
-            description: "Specify dotnet version of the libary"
+            description: "Specify dotnet version of the library"
             required: false
             type: string
             default: "6.0.x"
@@ -42,10 +42,10 @@ jobs:
       
       - name: Build solution and generate NuGet package
         run: |  
-          cd ${{ inputs.libary-path }}
+          cd ${{ inputs.library-path }}
           dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
           
       - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./${{ inputs.libary-path }}/out/*.nupkg -s https://nuget.pkg.github.com/cloudfactorydk/index.json -k ${TOKEN} --skip-duplicate
+        run: dotnet nuget push ./${{ inputs.library-path }}/out/*.nupkg -s https://nuget.pkg.github.com/cloudfactorydk/index.json -k ${TOKEN} --skip-duplicate
         env:
           TOKEN: ${{ secrets.token }}
