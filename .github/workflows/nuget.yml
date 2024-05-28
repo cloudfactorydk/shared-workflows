@@ -46,6 +46,8 @@ jobs:
           dotnet pack --configuration Release /p:Version=${{ inputs.version }} --output out
           
       - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./${{ inputs.library-path }}/out/*.nupkg -s https://nuget.pkg.github.com/cloudfactorydk/index.json -k ${TOKEN} --skip-duplicate
+        run: |
+          path=$(find . -name *.nupkg)
+          dotnet nuget push $path -s https://nuget.pkg.github.com/cloudfactorydk/index.json -k ${TOKEN} --skip-duplicate
         env:
           TOKEN: ${{ secrets.token }}
