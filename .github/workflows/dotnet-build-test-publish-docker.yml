@@ -4,36 +4,41 @@ on:
   workflow_call:
     inputs:
       project_path:
-        description: 'The project path is where the Solution file is located'
+        description: "The project path is where the Solution file is located"
         required: true
         type: string
       dockerfile_path:
-        description: 'Path to the Dockerfile'
+        description: "Path to the Dockerfile"
         required: true
         type: string
       docker_image_name:
-        description: 'Docker image name'
+        description: "Docker image name"
         required: true
         type: string
       docker_image_tag:
-        description: 'Additional Docker image tag to build'
+        description: "Additional Docker image tag to build"
         required: false
         type: string
-      artifact_name:
-        description: 'Name of the artifact that should be used'
+      skip_branch_tag:
+        description: "Will skip default creation of branch tag eg. will not create a tag for associated branch"
         required: false
-        default: ''
+        default: false
+        type: boolean
+      artifact_name:
+        description: "Name of the artifact that should be used"
+        required: false
+        default: ""
         type: string
       artifact_path:
-        description: 'Path for artifact'
+        description: "Path for artifact"
         required: false
-        default: './'
+        default: "./"
         type: string
       github_runner:
-        description: 'Which runner should be used in this workflow'
+        description: "Which runner should be used in this workflow"
         required: false
         type: string
-        default: 'ubuntu-latest'
+        default: "ubuntu-latest"
     secrets:
       gh_token:
         description: Github PAT token to perform login to Github Container Registry
@@ -50,7 +55,6 @@ permissions:
   pull-requests: write
   contents: read
   packages: write
-
 
 jobs:
   create-and-publish-docker-container:
@@ -73,7 +77,7 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "short_sha=$calculatedSha" >> $GITHUB_ENV
           echo $calculatedSha
-          
+
       - name: Normalize Git Branch Name
         id: normalize_branch
         run: |
@@ -94,11 +98,11 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ inputs.docker_image_name }}
-          
+
           tags: |
             type=raw,value=${{ inputs.docker_image_tag }}
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ env.normalized_branch }}
+            type=raw,value=${{ env.normalized_branch }},enable=${{!inputs.skip_branch_tag}}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
